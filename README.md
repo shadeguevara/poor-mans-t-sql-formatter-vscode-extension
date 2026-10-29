@@ -15,7 +15,7 @@ npm ci
 npx --yes @vscode/vsce package --no-dependencies
 ```
 
-In VS Code, open **Extensions**, select the **…** menu, choose **Install from VSIX…**, and select `poor-mans-t-sql-formatter-pg-0.1.7.vsix`. Installing from VSIX replaces the installed version of the same extension. Pressing **F5** instead launches a separate Extension Development Host and does not update your regular VS Code profile.
+In VS Code, open **Extensions**, select the **…** menu, choose **Install from VSIX…**, and select the generated `poor-mans-t-sql-formatter-pg-<version>.vsix` file. Installing from VSIX replaces the installed version of the same extension. Pressing **F5** instead launches a separate Extension Development Host and does not update your regular VS Code profile.
 
 ## Use the formatter
 
@@ -35,6 +35,8 @@ The extension contributes document and range formatting providers for the `sql` 
 ```
 
 **Format SQL** also has the `Ctrl+K`, then `Shift+F` key sequence by default. Keybindings can be changed through **Preferences: Open Keyboard Shortcuts**.
+
+To inspect changes before applying them, run **Poor Man's SQL: Preview formatting** or select SQL and run **Poor Man's SQL: Preview selection formatting**. Review the diff, then choose **Apply Formatting** or **Discard**. The original document is not changed unless you apply the preview.
 
 ## What this formatter customizes
 
@@ -146,6 +148,8 @@ For settings shared across machines or repositories, create a JSON file and set 
 ```
 
 Relative paths resolve from the workspace folder containing the SQL document; an absolute path is also accepted. Values in the file override matching VS Code settings. Options omitted from the file continue to use their VS Code values. The file is read and validated each time SQL is formatted, so edits take effect immediately.
+
+Run **Poor Man's SQL: Validate settings file** from the Command Palette to check the configured file without formatting SQL. The command reports whether the JSON and option names and values are valid.
 
 The file uses the option names without the `poor-mans-t-sql-formatter-pg.` prefix. Standard and obfuscation library settings can be grouped under `std` and `min`; custom formatter settings go at the top level:
 

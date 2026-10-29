@@ -362,4 +362,47 @@ suite("Extension Test Suite", () => {
       await vscode.workspace.fs.delete(settingsUri);
     }
   });
+
+  test("validates the configured JSON settings file", async () => {
+    const settings = vscode.workspace.getConfiguration(
+      "poor-mans-t-sql-formatter-pg"
+    );
+    const settingsFile = path.join(
+      os.tmpdir(),
+      `poor-mans-sql-validation-${Date.now()}.json`
+    );
+    const settingsUri = vscode.Uri.file(settingsFile);
+    await vscode.workspace.fs.writeFile(
+      settingsUri,
+      Buffer.from(JSON.stringify({ std: { uppercaseKeywords: false } }))
+    );
+    await settings.update(
+      "settingsFile",
+      settingsFile,
+      vscode.ConfigurationTarget.Global
+    );
+
+    try {
+      const validResult = await vscode.commands.executeCommand<boolean>(
+        "poor-mans-t-sql-formatter-pg.validateSettingsFile"
+      );
+      assert.strictEqual(validResult, true);
+
+      await vscode.workspace.fs.writeFile(
+        settingsUri,
+        Buffer.from(JSON.stringify({ unknownOption: true }))
+      );
+      const invalidResult = await vscode.commands.executeCommand<boolean>(
+        "poor-mans-t-sql-formatter-pg.validateSettingsFile"
+      );
+      assert.strictEqual(invalidResult, false);
+    } finally {
+      await settings.update(
+        "settingsFile",
+        undefined,
+        vscode.ConfigurationTarget.Global
+      );
+      await vscode.workspace.fs.delete(settingsUri);
+    }
+  });
 });

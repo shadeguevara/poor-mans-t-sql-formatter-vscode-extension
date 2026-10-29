@@ -4,6 +4,11 @@ All notable changes to the "poor-mans-t-sql-formatter-pg" extension will be docu
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.1.8] - 2026-10-29
+
+- Preview document or selection formatting in a diff before applying changes.
+- Validate the configured JSON settings file directly from the Command Palette.
+
 ## [0.1.7] - 2026-10-29
 
 - Add optional validated JSON settings files with workspace-relative paths.
