@@ -4,6 +4,19 @@ A VS Code extension for formatting T-SQL, based on [Poor Man's T-SQL Formatter](
 
 The formatter changes SQL text. Review the diff before saving or running formatted SQL, especially when using comment removal or keyword standardization.
 
+## Install
+
+Install **Poor Man's T-SQL Formatter** from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=piotrgredowski.poor-mans-t-sql-formatter-pg).
+
+To try the version built from this repository, package it locally and install the generated VSIX:
+
+```powershell
+npm ci
+npx --yes @vscode/vsce package --no-dependencies
+```
+
+In VS Code, open **Extensions**, select the **…** menu, choose **Install from VSIX…**, and select `poor-mans-t-sql-formatter-pg-0.1.7.vsix`. Installing from VSIX replaces the installed version of the same extension. Pressing **F5** instead launches a separate Extension Development Host and does not update your regular VS Code profile.
+
 ## Use the formatter
 
 1. Open a `.sql` file in VS Code.
@@ -11,11 +24,31 @@ The formatter changes SQL text. Review the diff before saving or running formatt
 3. To format only part of a file, select the SQL and run **Poor Man's SQL: Format selection** or VS Code's **Format Selection** action.
 4. Review the result in the editor and undo with **Ctrl+Z** if needed.
 
-The extension contributes document and range formatting providers for the `sql` language. In a development checkout, press **F5** to launch an Extension Development Host; that does not install the checkout into your normal VS Code profile.
+The extension contributes document and range formatting providers for the `sql` language. If VS Code asks which formatter to use, select **Poor Man's T-SQL Formatter**. To make it the default for SQL files, add this to your VS Code settings:
+
+```json
+{
+  "[sql]": {
+    "editor.defaultFormatter": "poor-mans-t-sql-formatter-pg"
+  }
+}
+```
+
+**Format SQL** also has the `Ctrl+K`, then `Shift+F` key sequence by default. Keybindings can be changed through **Preferences: Open Keyboard Shortcuts**.
+
+## What this formatter customizes
+
+- Procedure parameters can be placed one per line; each `SELECT` projection can also get its own line.
+- Compact `CASE` layout aligns `CASE`, `ELSE`, and `END`, with one `WHEN` per line and `THEN` kept beside it when the branch fits.
+- Optional rules can move assigned `CASE` expressions, wrap long Boolean conditions, expand long `IN` lists, and separate trailing inline comments.
+- Comment spacing and procedure-body indentation can be tailored without changing the upstream formatter's standard options.
+- Settings can be configured in VS Code or shared through a validated JSON settings file.
+
+These are formatting rules, not SQL refactoring: the formatter does not reorder `CASE` branches, add `ELSE` values, or infer which conditions should come first.
 
 ## Personalize formatting
 
-Open **Preferences: Open User Settings (JSON)** or the workspace's `.vscode/settings.json`. The settings below show the extension's compact stored-procedure defaults; remove any entries you want to leave at their defaults.
+Open **Preferences: Open User Settings (JSON)** for your personal defaults, or edit the workspace's `.vscode/settings.json` to share settings with that workspace. VS Code settings can be overridden at workspace or folder scope. The example below shows a compact stored-procedure style; remove any entries you want to leave at their defaults.
 
 ```json
 {
@@ -104,7 +137,15 @@ The full setting names are prefixed with `poor-mans-t-sql-formatter-pg.`. You ca
 
 ### Shared JSON settings file
 
-For settings shared across machines or repositories, set `poor-mans-t-sql-formatter-pg.settingsFile` to a JSON file path. Relative paths resolve from the workspace folder containing the SQL document; an absolute path is also accepted. Values in the file override VS Code settings. The file is read and validated each time SQL is formatted, so edits take effect immediately.
+For settings shared across machines or repositories, create a JSON file and set `poor-mans-t-sql-formatter-pg.settingsFile` in VS Code settings to its path. For example, to use `.vscode/sql-formatter.json` in the workspace:
+
+```json
+{
+  "poor-mans-t-sql-formatter-pg.settingsFile": ".vscode/sql-formatter.json"
+}
+```
+
+Relative paths resolve from the workspace folder containing the SQL document; an absolute path is also accepted. Values in the file override matching VS Code settings. Options omitted from the file continue to use their VS Code values. The file is read and validated each time SQL is formatted, so edits take effect immediately.
 
 The file uses the option names without the `poor-mans-t-sql-formatter-pg.` prefix. Standard and obfuscation library settings can be grouped under `std` and `min`; custom formatter settings go at the top level:
 
