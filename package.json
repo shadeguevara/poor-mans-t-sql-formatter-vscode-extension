@@ -2,7 +2,7 @@
   "name": "poor-mans-t-sql-formatter-pg",
   "displayName": "poor-mans-t-sql-formatter-pg",
   "description": "",
-  "version": "0.1.5",
+  "version": "0.1.7",
   "publisher": "piotrgredowski",
   "repository": "https://github.com/piotrgredowski/poor-mans-t-sql-formatter-vscode-extension",
   "engines": {
@@ -96,9 +96,14 @@
           "description": "Text to be included (in a comment at the top) if parsing failed and result is therefore suspect"
         },
         "poor-mans-t-sql-formatter-pg.dontInsertErrorOutput": {
-          "type": "string",
+          "type": "boolean",
           "default": true,
           "description": "If value defined in `poor-mans-t-sql-formatter-pg.errorOutputPrefix` should be inserted into formatted SQL."
+        },
+        "poor-mans-t-sql-formatter-pg.settingsFile": {
+          "type": "string",
+          "default": "",
+          "description": "Optional JSON formatter settings file. Relative paths resolve from the current workspace folder; absolute paths are also supported. File values override VS Code settings."
         },
         "poor-mans-t-sql-formatter-pg.formattingType": {
           "type": "string",
@@ -109,23 +114,93 @@
             "obfuscation"
           ]
         },
+        "poor-mans-t-sql-formatter-pg.compactCaseExpressions": {
+          "type": "boolean",
+          "default": true,
+          "description": "Keep CASE branches compact: align WHEN/ELSE/END and put THEN on the WHEN line when the line fits."
+        },
+        "poor-mans-t-sql-formatter-pg.caseExpressionOnNewLine": {
+          "type": "boolean",
+          "default": false,
+          "description": "Put a CASE expression on the line after a simple assignment such as 'ColumnName = CASE'."
+        },
+        "poor-mans-t-sql-formatter-pg.castCaseExpressionOnNewLine": {
+          "type": "boolean",
+          "default": false,
+          "description": "Put CASE on a continuation line inside directly assigned CAST(...) or CONVERT(...) expressions."
+        },
+        "poor-mans-t-sql-formatter-pg.booleanOperatorPosition": {
+          "type": "string",
+          "enum": [
+            "leading",
+            "trailing"
+          ],
+          "default": "leading",
+          "description": "When Boolean expressions are expanded, place AND/OR at the start of the continuation line or at the end of the preceding line."
+        },
+        "poor-mans-t-sql-formatter-pg.booleanExpressionMaxWidth": {
+          "type": "number",
+          "minimum": 0,
+          "default": 120,
+          "description": "Wrap long single-line Boolean expressions at AND/OR when they exceed this width. Set to 0 to disable."
+        },
+        "poor-mans-t-sql-formatter-pg.inListExpandThreshold": {
+          "type": "number",
+          "minimum": 0,
+          "default": 0,
+          "description": "Automatically expand IN lists with more than this many top-level items. Set to 0 to disable; std.expandInLists still expands all lists."
+        },
+        "poor-mans-t-sql-formatter-pg.separateInlineComments": {
+          "type": "boolean",
+          "default": false,
+          "description": "Move trailing inline -- comments onto their own line, aligned with the code they follow."
+        },
+        "poor-mans-t-sql-formatter-pg.preserveComments": {
+          "type": "boolean",
+          "default": true,
+          "description": "Retain SQL comments while formatting. Turn off to remove line and block comments before formatting; comment-based tool directives are removed too."
+        },
+        "poor-mans-t-sql-formatter-pg.procedureParametersOnSeparateLines": {
+          "type": "boolean",
+          "default": true,
+          "description": "Put each stored procedure parameter on its own line."
+        },
+        "poor-mans-t-sql-formatter-pg.selectColumnsOnSeparateLines": {
+          "type": "boolean",
+          "default": true,
+          "description": "Start SELECT lists on a new line and format each projection on its own line."
+        },
+        "poor-mans-t-sql-formatter-pg.separateCommentsFromCode": {
+          "type": "boolean",
+          "default": true,
+          "description": "Align standalone comment blocks with the following code and separate them from code with a blank line."
+        },
+        "poor-mans-t-sql-formatter-pg.spaceAfterInListComma": {
+          "type": "boolean",
+          "default": false,
+          "description": "Add a space after commas inside IN lists when the list is kept on one line."
+        },
+        "poor-mans-t-sql-formatter-pg.indentProcedureBody": {
+          "type": "boolean",
+          "default": false,
+          "description": "Indent the outer stored procedure body under BEGIN. Nested blocks stay indented either way."
+        },
         "poor-mans-t-sql-formatter-pg.std.indent": {
           "type": "string",
           "description": "Provide only if you want to override editor settings. The unit of indentation - typically a tab (\\t) or a number of spaces."
         },
         "poor-mans-t-sql-formatter-pg.std.spacesPerTab": {
           "type": "number",
-          "default": 4,
           "description": "This is used to measure line length, and only applies if you use tabs"
         },
         "poor-mans-t-sql-formatter-pg.std.maxLineWidth": {
           "type": "number",
-          "default": 999,
+          "default": 120,
           "description": "Request that the formatter wrap long lines to avoid exceeding this line length"
         },
         "poor-mans-t-sql-formatter-pg.std.statementBreaks": {
           "type": "number",
-          "default": 2,
+          "default": 1,
           "description": "How many linebreaks should be added when starting a new statement?"
         },
         "poor-mans-t-sql-formatter-pg.std.clauseBreaks": {
@@ -196,7 +271,7 @@
         "poor-mans-t-sql-formatter-pg.min.preserveComments": {
           "type": "boolean",
           "default": true,
-          "description": "Should comments in the code be retained (vs being stripped out)?"
+          "description": "Legacy obfuscation option. Use poor-mans-t-sql-formatter-pg.preserveComments to remove comments in either formatting mode."
         },
         "poor-mans-t-sql-formatter-pg.min.enableKeywordSubstitution": {
           "type": "boolean",
@@ -212,6 +287,7 @@
     "watch": "webpack --watch",
     "package": "webpack --mode production --devtool hidden-source-map",
     "compile-tests": "tsc -p . --outDir out",
+    "typecheck": "tsc --noEmit -p .",
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
@@ -229,9 +305,9 @@
     "eslint": "^8.1.0",
     "glob": "^7.1.7",
     "husky": "^8.0.0",
+    "lint-staged": "^13.3.0",
     "mocha": "^9.1.3",
     "prettier": "^2.7.1",
-    "pretty-quick": "^3.1.3",
     "ts-loader": "^9.2.5",
     "typescript": "^4.4.4",
     "webpack": "^5.52.1",

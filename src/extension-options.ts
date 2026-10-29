@@ -1,4 +1,4 @@
-enum FormattingType {
+export enum FormattingType {
   standard = "standard",
   obfuscation = "obfuscation",
 }
@@ -29,4 +29,16 @@ export interface ExtensionOptions {
   randomizeLineLengths: boolean;
   preserveComments: boolean;
   enableKeywordSubstitution: boolean;
+  compactCaseExpressions: boolean;
+  caseExpressionOnNewLine: boolean;
+  castCaseExpressionOnNewLine: boolean;
+  booleanOperatorPosition: "leading" | "trailing";
+  booleanExpressionMaxWidth: number;
+  inListExpandThreshold: number;
+  separateInlineComments: boolean;
+  procedureParametersOnSeparateLines: boolean;
+  selectColumnsOnSeparateLines: boolean;
+  separateCommentsFromCode: boolean;
+  spaceAfterInListComma: boolean;
+  indentProcedureBody: boolean;
 }
