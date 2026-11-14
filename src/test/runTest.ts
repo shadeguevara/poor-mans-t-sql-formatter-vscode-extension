@@ -34,7 +34,13 @@ async function main() {
       ],
       ...(executablePath
         ? { vscodeExecutablePath: executablePath }
-        : { version: process.env.VSCODE_TEST_VERSION || "stable" }),
+        : {
+            version: process.env.VSCODE_TEST_VERSION || "stable",
+            // test-electron 1.x asks for the 32-bit Windows build, which VS Code no longer publishes (404)
+            ...(process.platform === "win32" && process.arch === "x64"
+              ? { platform: "win32-x64-archive" as const }
+              : {}),
+          }),
     });
     if (exitCode !== 0) {
       process.exitCode = exitCode;
