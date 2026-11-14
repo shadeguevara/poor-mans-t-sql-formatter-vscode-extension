@@ -1,0 +1,4 @@
+{
+  // Long lines are fine: tables and prose are not wrapped.
+  "MD013": false
+}

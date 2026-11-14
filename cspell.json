@@ -1,0 +1,13 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": ["amodio", "dbaeumer", "dont", "Klerks", "Uppercases"],
+  "ignorePaths": [
+    "node_modules",
+    ".venv",
+    "references",
+    "data",
+    "corpus",
+    ".local"
+  ]
+}
